@@ -1,0 +1,236 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{listings}
+
+\geometry{margin=2.5cm}
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  frame=single,
+  breaklines=true,
+  showstringspaces=false,
+  literate={é}{{\'e}}1 {à}{{\`a}}1 {’}{{'}}1
+}
+
+\newcommand{\rapportcapture}[2]{%
+  \begin{figure}[htbp]
+    \centering
+    \IfFileExists{#1}{%
+      \includegraphics[width=0.9\linewidth]{#1}%
+    }{%
+            \fbox{\parbox[c][4cm][c]{0.82\linewidth}{\centering #2}}
+    }
+  \end{figure}
+}
+
+\title{TP2}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Exercice 1 : Tests unitaires}
+
+\paragraph{tests/unit/test\_livraison.py}
+\begin{lstlisting}
+import pytest
+
+from app.livraison import frais_livraison
+
+
+def test_livraison_panier_ordinaire():
+    assert frais_livraison(120) == 25
+
+
+def test_livraison_panier_299():
+    assert frais_livraison(299) == 25
+
+
+def test_livraison_panier_300():
+    assert frais_livraison(300) == 0
+
+
+def test_livraison_panier_301():
+    assert frais_livraison(301) == 0
+
+
+def test_livraison_panier_zero():
+    assert frais_livraison(0) == 25
+
+
+def test_livraison_montant_negatif():
+    with pytest.raises(ValueError):
+        frais_livraison(-1)
+\end{lstlisting}
+
+\rapportcapture
+  {screenshots/fig1_output_exercice1.png}
+  {Fig. 1 : Output exercice 1}
+
+\section{Exercice 2 : Nettoyer un texte avant son analyse}
+
+\paragraph{app/texte.py}
+\begin{lstlisting}
+def nettoyer_texte(texte):
+  if not isinstance(texte, str):
+    raise TypeError("Texte attendu")
+  return " ".join(texte.lower().split())
+\end{lstlisting}
+
+\paragraph{tests/test\_texte.py}
+\begin{lstlisting}
+import pytest
+
+from app.texte import nettoyer_texte
+
+
+@pytest.mark.parametrize(
+  "entree, attendu",
+  [
+    ("  BONJOUR   monde  ", "bonjour monde"),
+    (" déjà propre ", "déjà propre"),
+    ("", ""),
+    ("   ", ""),
+    (" PYTHON ", "python"),
+  ],
+)
+def test_nettoyer_texte(entree, attendu):
+  assert nettoyer_texte(entree) == attendu
+
+
+@pytest.mark.parametrize("entree", [123, None])
+def test_nettoyer_texte_entree_non_textuelle(entree):
+  with pytest.raises(TypeError):
+    nettoyer_texte(entree)
+
+
+def test_nettoyer_texte_deja_nettoye_ne_change_pas():
+  texte_nettoye = nettoyer_texte("  BONJOUR   monde  ")
+  assert nettoyer_texte(texte_nettoye) == texte_nettoye
+\end{lstlisting}
+
+\rapportcapture
+  {screenshots/fig2_output_exercice2.png}
+  {Fig. 2 : Output exercice 2}
+
+\section{Exercice 3 : Fixtures et tests d'intégration}
+
+\paragraph{app/reservation.py}
+\begin{lstlisting}
+class Stock:
+  def __init__(self, quantite):
+    self.quantite = quantite
+
+  def retirer(self, quantite):
+    if quantite <= 0:
+      raise ValueError("Quantité positive requise")
+    if quantite > self.quantite:
+      return False
+    self.quantite -= quantite
+    return True
+
+
+class Reservation:
+  def __init__(self, stock):
+    self.stock = stock
+
+  def reserver(self, quantite):
+    if self.stock.retirer(quantite):
+      return "confirmee"
+    return "refusee"
+\end{lstlisting}
+
+\paragraph{tests/test\_reservation.py}
+\begin{lstlisting}
+import pytest
+
+from app.reservation import Reservation, Stock
+
+
+@pytest.fixture
+def stock():
+  return Stock(5)
+
+
+def test_reservation_deux_unites_confirmee_et_stock_reduit(stock):
+  reservation = Reservation(stock)
+  assert reservation.reserver(2) == "confirmee"
+  assert stock.quantite == 3
+
+
+def test_reservation_six_unites_refusee_et_stock_inchange(stock):
+  reservation = Reservation(stock)
+  assert reservation.reserver(6) == "refusee"
+  assert stock.quantite == 5
+
+
+def test_reservation_cinq_unites_confirmee_et_stock_vide(stock):
+  reservation = Reservation(stock)
+  assert reservation.reserver(5) == "confirmee"
+  assert stock.quantite == 0
+
+
+def test_reservation_zero_unite_leve_value_error_et_stock_inchange(stock):
+  reservation = Reservation(stock)
+  with pytest.raises(ValueError):
+    reservation.reserver(0)
+  assert stock.quantite == 5
+\end{lstlisting}
+
+\rapportcapture
+  {screenshots/fig3_output_exercice3.png}
+  {Fig. 3 : Output exercice 3}
+
+\section{Exercice 4 : Isolation des dépendances}
+
+\paragraph{app/moderation.py}
+\begin{lstlisting}
+def decider(modele, message):
+  classe = modele.predict(message)
+  if classe == "spam":
+    return "bloquer"
+  return "autoriser"
+\end{lstlisting}
+
+\paragraph{tests/test\_moderation.py}
+\begin{lstlisting}
+from unittest.mock import Mock
+
+import pytest
+
+from app.moderation import decider
+
+
+def test_decider_bloque_un_spam():
+  modele = Mock()
+  modele.predict.return_value = "spam"
+  assert decider(modele, "Offre miracle") == "bloquer"
+  modele.predict.assert_called_once_with("Offre miracle")
+
+
+def test_decider_autorise_un_message_normal():
+  modele = Mock()
+  modele.predict.return_value = "normal"
+  assert decider(modele, "Bonjour") == "autoriser"
+  modele.predict.assert_called_once_with("Bonjour")
+
+
+def test_decider_propage_erreur_du_modele():
+  modele = Mock()
+  modele.predict.side_effect = RuntimeError("Modele indisponible")
+  with pytest.raises(RuntimeError, match="Modele indisponible"):
+    decider(modele, "Offre miracle")
+\end{lstlisting}
+
+\rapportcapture
+  {screenshots/fig4_output_exercice4.png}
+  {Fig. 4 : Output exercice 4}
+
+\end{document}
