@@ -12,3 +12,10 @@
 !rapport/
 !rapport/tp2.pdf
 !requierments.txt
+
+exercices/
+
+
+*.aux
+*.log
+*.tex
