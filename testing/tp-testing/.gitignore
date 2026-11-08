@@ -1,1 +1,14 @@
-__pycache__/
+# Ignore generated and unrelated files by default.
+*
+
+# Keep the submission files visible to Git.
+!.gitignore
+!app/
+!app/*.py
+!tests/
+!tests/*.py
+!tests/unit/
+!tests/unit/*.py
+!rapport/
+!rapport/tp2.pdf
+!requierments.txt

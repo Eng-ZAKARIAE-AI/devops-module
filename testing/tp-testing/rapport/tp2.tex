@@ -1,32 +1,115 @@
-\documentclass[12pt,a4paper]{article}
+\documentclass[11pt,a4paper]{article}
 
+% ---------- Encodage et langue ----------
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+\usepackage{lmodern}
 \usepackage[french]{babel}
-\usepackage{geometry}
+\usepackage{microtype}
+
+% ---------- Mise en page ----------
+\usepackage[a4paper, margin=2.5cm, headheight=24pt, footskip=1.2cm]{geometry}
+\usepackage{xcolor}
 \usepackage{graphicx}
+\usepackage{array}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{caption}
 \usepackage{listings}
 
-\geometry{margin=2.5cm}
-\lstset{
-  language=Python,
-  basicstyle=\ttfamily\small,
-  frame=single,
-  breaklines=true,
-  showstringspaces=false,
-  literate={é}{{\'e}}1 {à}{{\`a}}1 {’}{{'}}1
+\linespread{1.1}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+% ---------- Couleurs ENIAD ----------
+\definecolor{ENIADNavy}{HTML}{12304A}
+\definecolor{ENIADOrange}{HTML}{E87924}
+\definecolor{ENIADBlue}{HTML}{2878A8}
+\definecolor{ENIADGray}{HTML}{5D6872}
+\definecolor{ENIADWhite}{HTML}{FFFFFF}
+\definecolor{ENIADLightBlue}{HTML}{EAF3F8}
+\definecolor{CodeGreen}{HTML}{3C7A4E}
+
+% ---------- En-tête et pied de page ----------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.8pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{ENIADOrange}\leaders\hrule height \headrulewidth\hfill}}
+\fancyhead[L]{\small\sffamily\color{ENIADGray} Testing logiciel \textbullet\ TP\,2}
+\fancyhead[R]{\small\sffamily\color{ENIADGray} Zakariae El Haddouchi}
+\fancyfoot[C]{\small\sffamily\color{ENIADNavy}\thepage}
+
+% ---------- Titres de section ----------
+\titleformat{\section}[block]
+  {\sffamily\Large\bfseries\color{ENIADNavy}}
+  {\textcolor{ENIADOrange}{Exercice~\thesection}\hspace{0.5em}\textcolor{ENIADOrange}{|}}
+  {0.6em}
+  {}
+  [\vspace{3pt}{\color{ENIADOrange}\titlerule[1pt]}]
+\titlespacing*{\section}{0pt}{20pt}{10pt}
+
+% ---------- Légendes ----------
+\addto\captionsfrench{\renewcommand{\figurename}{Fig.}}
+\captionsetup{
+  font={small,rm,color=ENIADGray},
+  labelfont={up,color=ENIADOrange},
+  labelsep=colon,
+  skip=6pt
 }
 
+% ---------- Code ----------
+\lstdefinestyle{eniad}{
+  language=Python,
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{ENIADBlue}\bfseries,
+  stringstyle=\color{ENIADOrange},
+  commentstyle=\color{CodeGreen}\itshape,
+  numbers=left,
+  numberstyle=\tiny\color{ENIADGray},
+  numbersep=8pt,
+  backgroundcolor=\color{ENIADLightBlue!45},
+  frame=leftline,
+  rulecolor=\color{ENIADOrange},
+  framerule=2pt,
+  framesep=6pt,
+  xleftmargin=22pt,
+  framexleftmargin=18pt,
+  breaklines=true,
+  showstringspaces=false,
+  columns=fullflexible,
+  aboveskip=4pt,
+  belowskip=8pt,
+  literate=
+    {é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {â}{{\^a}}1
+    {ç}{{\c c}}1 {î}{{\^\i}}1 {ô}{{\^o}}1 {û}{{\^u}}1 {ù}{{\`u}}1
+    {É}{{\'E}}1 {’}{{'}}1
+}
+\lstset{style=eniad}
+
+% Nom de fichier affiché au-dessus d'un bloc de code
+\newcommand{\fichier}[1]{%
+  \par\medskip\noindent
+  {\sffamily\small\bfseries\color{ENIADNavy}%
+   \colorbox{ENIADLightBlue}{\strut\ \texttt{#1}\ }}%
+  \par\nopagebreak\vspace{-2pt}}
+
+% Capture d'écran (cadre de remplacement si l'image est absente)
 \newcommand{\rapportcapture}[2]{%
-  \begin{figure}[htbp]
+  \begin{figure}[H]
     \centering
     \IfFileExists{#1}{%
-      \includegraphics[width=0.9\linewidth]{#1}%
+      \fbox{\includegraphics[width=0.9\linewidth]{#1}}%
     }{%
-            \fbox{\parbox[c][4cm][c]{0.82\linewidth}{\centering #2}}
+      \fcolorbox{ENIADBlue!50}{ENIADLightBlue}{%
+        \parbox[c][4cm][c]{0.82\linewidth}{\centering\sffamily\color{ENIADGray}
+          Capture à insérer\\[2pt]{\footnotesize\ttfamily\detokenize{#1}}}}%
     }
-  \end{figure}
-}
+    \caption{#2}
+  \end{figure}}
 
 \title{TP2}
 \author{}
@@ -34,11 +117,11 @@
 
 \begin{document}
 
-\maketitle
+\input{cover-rapport-tp-.tex}
 
-\section{Exercice 1 : Tests unitaires}
+\section{Tests unitaires}
 
-\paragraph{tests/unit/test\_livraison.py}
+\fichier{tests/unit/test\_livraison.py}
 \begin{lstlisting}
 import pytest
 
@@ -72,11 +155,25 @@ def test_livraison_montant_negatif():
 
 \rapportcapture
   {screenshots/fig1_output_exercice1.png}
-  {Fig. 1 : Output exercice 1}
+  {Sortie de l'exercice 1}
 
-\section{Exercice 2 : Nettoyer un texte avant son analyse}
+\paragraph{Interprétation des résultats.}
+Les tests vérifient les montants de part et d'autre du seuil, le panier vide
+et le rejet d'un montant négatif. Le cas de 300 DH a révélé le défaut :
+l'ancienne condition \texttt{montant > 300} facturait encore 25 DH au seuil.
+La règle a été corrigée en \texttt{montant >= 300} ; les frais sont donc
+gratuits à partir de 300 DH inclus. Une exception \texttt{ValueError} attendue
+compte comme un test réussi.
 
-\paragraph{app/texte.py}
+\paragraph{Réponse à la question.}
+Tester seulement 120 DH et 500 DH n'aurait pas révélé l'erreur : ces valeurs
+se trouvent de part et d'autre du seuil et donnent respectivement 25 DH et
+0 DH avec les deux conditions (\texttt{>} et \texttt{>=}). Le test à 300 DH
+est nécessaire pour distinguer précisément ces conditions.
+
+\section{Nettoyer un texte avant son analyse}
+
+\fichier{app/texte.py}
 \begin{lstlisting}
 def nettoyer_texte(texte):
   if not isinstance(texte, str):
@@ -84,7 +181,7 @@ def nettoyer_texte(texte):
   return " ".join(texte.lower().split())
 \end{lstlisting}
 
-\paragraph{tests/test\_texte.py}
+\fichier{tests/test\_texte.py}
 \begin{lstlisting}
 import pytest
 
@@ -118,11 +215,20 @@ def test_nettoyer_texte_deja_nettoye_ne_change_pas():
 
 \rapportcapture
   {screenshots/fig2_output_exercice2.png}
-  {Fig. 2 : Output exercice 2}
+  {Sortie de l'exercice 2}
 
-\section{Exercice 3 : Fixtures et tests d'intégration}
+\paragraph{Interprétation des résultats.}
+Les tests confirment la conversion en minuscules, la réduction des espaces et
+la stabilité d'un texte déjà nettoyé, y compris pour une chaîne vide. Les
+entrées qui ne sont pas des chaînes doivent lever \texttt{TypeError}. En cas
+d'échec, comparer la sortie exacte attendue et vérifier que les entrées
+invalides ne sont pas acceptées silencieusement. La suite de ce fichier exécute
+huit cas : cinq valeurs paramétrées, deux entrées non textuelles et un test
+d'idempotence.
 
-\paragraph{app/reservation.py}
+\section{Fixtures et tests d'intégration}
+
+\fichier{app/reservation.py}
 \begin{lstlisting}
 class Stock:
   def __init__(self, quantite):
@@ -147,7 +253,7 @@ class Reservation:
     return "refusee"
 \end{lstlisting}
 
-\paragraph{tests/test\_reservation.py}
+\fichier{tests/test\_reservation.py}
 \begin{lstlisting}
 import pytest
 
@@ -186,11 +292,26 @@ def test_reservation_zero_unite_leve_value_error_et_stock_inchange(stock):
 
 \rapportcapture
   {screenshots/fig3_output_exercice3.png}
-  {Fig. 3 : Output exercice 3}
+  {Sortie de l'exercice 3}
 
-\section{Exercice 4 : Isolation des dépendances}
+\paragraph{Interprétation des résultats.}
+La fixture fournit un stock neuf à chaque test. Une réservation valide réduit
+le stock, une quantité insuffisante est refusée sans le modifier et une
+quantité non positive lève \texttt{ValueError}. Si un test échoue, contrôler à
+la fois la décision renvoyée et la quantité restante : une réponse correcte
+avec un stock incorrect révèle tout de même un défaut d'intégration.
 
-\paragraph{app/moderation.py}
+\paragraph{Réponses aux questions.}
+Les résultats restent identiques quel que soit l'ordre d'exécution, car la
+fixture crée un nouveau \texttt{Stock(5)} pour chaque test : aucun état mutable
+n'est partagé. Ces tests vérifient une intégration parce qu'ils font
+collaborer les vrais objets \texttt{Reservation} et \texttt{Stock} et
+contrôlent à la fois le résultat et l'état du stock, sans remplacer de
+dépendance par un mock.
+
+\section{Isolation des dépendances}
+
+\fichier{app/moderation.py}
 \begin{lstlisting}
 def decider(modele, message):
   classe = modele.predict(message)
@@ -199,7 +320,7 @@ def decider(modele, message):
   return "autoriser"
 \end{lstlisting}
 
-\paragraph{tests/test\_moderation.py}
+\fichier{tests/test\_moderation.py}
 \begin{lstlisting}
 from unittest.mock import Mock
 
@@ -231,6 +352,228 @@ def test_decider_propage_erreur_du_modele():
 
 \rapportcapture
   {screenshots/fig4_output_exercice4.png}
-  {Fig. 4 : Output exercice 4}
+  {Sortie de l'exercice 4}
+
+\paragraph{Interprétation des résultats.}
+Le mock permet de vérifier que \texttt{predict} reçoit le message une seule
+fois et que la décision correspond à sa réponse. Le test d'erreur confirme que
+l'exception du modèle est propagée. Si un test échoue, vérifier l'appel à la
+dépendance, la correspondance entre « spam » et « bloquer », et l'absence de
+masquage de l'erreur.
+
+\paragraph{Réponse à la question.}
+Ces tests valident le branchement entre la classe retournée par \texttt{predict}
+et la décision, ainsi que l'appel effectué avec le bon message. Ils ne
+permettent pas de conclure qu'un vrai modèle classe correctement les messages :
+le mock ne charge aucun modèle et ne mesure ni sa précision ni son comportement
+sur des données réelles.
+
+\section{Vérifier une alerte sans envoyer de notification}
+
+\fichier{app/notifications.py}
+\begin{lstlisting}
+def envoyer_notification(message):
+    raise RuntimeError("Service non configure")
+\end{lstlisting}
+
+\fichier{app/surveillance.py}
+\begin{lstlisting}
+from app.notifications import envoyer_notification
+
+
+def surveiller(taux_erreur):
+    if taux_erreur > 0.10:
+        envoyer_notification("Taux eleve")
+        return "alerte"
+    return "ok"
+\end{lstlisting}
+
+\fichier{tests/test\_surveillance.py}
+\begin{lstlisting}
+from unittest.mock import patch
+
+import pytest
+
+from app.notifications import envoyer_notification
+from app.surveillance import surveiller
+
+
+def test_envoyer_notification_indisponible_leve_runtime_error():
+    with pytest.raises(RuntimeError, match="Service non configure"):
+        envoyer_notification("Taux eleve")
+
+
+def test_surveiller_taux_superieur_au_seuil_declenche_alerte():
+    with patch("app.surveillance.envoyer_notification") as notifier:
+        assert surveiller(0.15) == "alerte"
+    notifier.assert_called_once_with("Taux eleve")
+
+
+def test_surveiller_taux_inferieur_au_seuil_ne_declenche_pas_alerte():
+    with patch("app.surveillance.envoyer_notification") as notifier:
+        assert surveiller(0.05) == "ok"
+    notifier.assert_not_called()
+
+
+def test_surveiller_taux_egal_au_seuil_ne_declenche_pas_alerte():
+    with patch("app.surveillance.envoyer_notification") as notifier:
+        assert surveiller(0.10) == "ok"
+    notifier.assert_not_called()
+
+
+def test_surveiller_propage_erreur_du_service_de_notification():
+    with patch(
+        "app.surveillance.envoyer_notification",
+        side_effect=RuntimeError("Service indisponible"),
+    ):
+        with pytest.raises(RuntimeError, match="Service indisponible"):
+            surveiller(0.15)
+\end{lstlisting}
+
+\rapportcapture
+  {screenshots/fig5_output_exercice5.png}
+  {Sortie des tests de l'exercice 5}
+
+\begin{minipage}{\linewidth}
+\paragraph{Interprétation des résultats.}
+À 0,15, la fonction renvoie « alerte » et appelle une fois le service ; à 0,05
+et au seuil exact 0,10, elle renvoie « ok » sans appel. Le test
+\texttt{side\_effect} confirme que \texttt{RuntimeError} est propagée. Le patch
+cible \texttt{app.surveillance.envoyer\_notification}, car c'est dans l'espace
+de noms du module testé que cette fonction importée est recherchée. En cas
+d'échec, vérifier le seuil strict, l'appel et son message, puis la propagation
+de l'exception. Un test supplémentaire vérifie aussi que le service de
+démonstration lève bien \texttt{RuntimeError} au lieu d'envoyer une notification.
+\end{minipage}
+
+\section{Modérer un message via une requête}
+
+\fichier{app/web.py}
+\begin{lstlisting}
+from flask import Flask, jsonify, request
+
+
+def create_app():
+    app = Flask(__name__)
+
+    @app.post("/moderate")
+    def moderate():
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return jsonify(error="JSON object required"), 400
+
+        message = data.get("message")
+        if not isinstance(message, str) or not message.strip():
+            return jsonify(error="Invalid message"), 400
+
+        mots = message.lower().split()
+        decision = "bloquer" if "spam" in mots else "autoriser"
+        return jsonify(decision=decision), 200
+
+    return app
+\end{lstlisting}
+
+\fichier{tests/test\_web.py}
+\begin{lstlisting}
+import pytest
+
+from app.web import create_app
+
+
+@pytest.fixture
+def client():
+    app = create_app()
+    app.config["TESTING"] = True
+    return app.test_client()
+
+
+def test_moderate_autorise_message_normal(client):
+    response = client.post("/moderate", json={"message": "bonjour"})
+    assert response.status_code == 200
+    assert response.get_json() == {"decision": "autoriser"}
+
+
+def test_moderate_bloque_message_contenant_spam_sans_casse(client):
+    response = client.post("/moderate", json={"message": "ceci est du SPAM"})
+    assert response.status_code == 200
+    assert response.get_json() == {"decision": "bloquer"}
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [{}, {"message": 42}, {"message": "   "}],
+)
+def test_moderate_refuse_message_invalide(client, payload):
+    response = client.post("/moderate", json=payload)
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "Invalid message"}
+
+
+def test_moderate_refuse_corps_json_qui_n_est_pas_un_objet(client):
+    response = client.post("/moderate", json=["message", "bonjour"])
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "JSON object required"}
+\end{lstlisting}
+
+\rapportcapture
+  {screenshots/fig6_output_exercice6.png}
+  {Sortie des tests de l'exercice 6}
+
+\paragraph{Interprétation des résultats.}
+Les requêtes valides reçoivent le statut 200 et une décision JSON : « bonjour »
+est autorisé, tandis que le mot « SPAM » est bloqué sans tenir compte de la
+casse. Les données manquantes, de mauvais type ou vides reçoivent le statut
+400 avec une erreur explicite ; un corps JSON qui n'est pas un objet reçoit
+également 400. En cas d'échec, vérifier à la fois le statut HTTP et le contenu
+JSON, pas seulement la décision interne. Le client Flask exerce la route et
+sa réponse sans démarrer de serveur réseau : il s'agit de tests fonctionnels
+de l'API, et non d'un parcours E2E complet.
+
+\section{Couverture de code}
+
+La configuration pytest ignore les tests de livraison pour les exercices
+suivants. Pour mesurer la suite complète, y compris les six tests de livraison,
+la commande ci-dessous remplace cette option et mesure aussi les branches :
+
+\begin{lstlisting}[language=bash]
+python -m pytest -o addopts="" --cov=app --cov-branch \
+  --cov-report=term-missing \
+  --cov-report=html:rapport/coverage_html tests/
+\end{lstlisting}
+
+\paragraph{Question 1 : quel comportement manquait ?}
+Avant le test supplémentaire, 32 tests réussissent et la couverture des
+instructions est de 99\,\%. Une ligne de \texttt{app/notifications.py} reste
+non couverte : l'appel réel au service n'était pas testé, car les tests de
+surveillance remplacent cette dépendance avec \texttt{patch}. Le test
+\texttt{test\_notification\_service\_leve\_runtime\_error} a été
+ajouté pour vérifier que ce service de démonstration lève
+\texttt{RuntimeError} au lieu d'envoyer une notification.
+
+\rapportcapture
+  {screenshots/couverture-avant.png}
+  {Couverture des tests avant l'ajout du test du service de notification}
+
+Après cet ajout, les 33 tests réussissent. La couverture passe de 99\,\% à
+100\,\% des instructions ; les 20 branches mesurées sont également couvertes
+(aucune branche partielle). Le rapport HTML confirme visuellement que les deux
+lignes de \texttt{app/notifications.py} sont exécutées.
+
+\rapportcapture
+  {screenshots/couverture-apres.png}
+  {Couverture après l'ajout du test supplémentaire}
+
+\rapportcapture
+  {screenshots/couverture-html.png}
+  {Rapport HTML détaillé : lignes exécutées dans app/notifications.py}
+
+\paragraph{Question 2 : comment interpréter l'évolution et ses limites ?}
+Après cet ajout, les 33 tests réussissent. La couverture des instructions passe
+de 99\,\% à 100\,\% et les 20 branches mesurées sont toutes parcourues. Cette
+progression vient d'un seul comportement manquant, désormais vérifié par une
+assertion sur l'exception attendue. Une couverture de 100\,\% ne garantit pas
+que tous les scénarios métier sont présents ni que les assertions détectent
+toutes les erreurs. Les tests de l'API, par exemple, ne remplacent pas une
+validation complète sur un vrai serveur ou en production.
 
 \end{document}
